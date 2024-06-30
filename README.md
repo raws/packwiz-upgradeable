@@ -32,3 +32,11 @@ packwiz-upgradeable will write to stdout:
 [Entity Culling] ✅ Compatible with 1.21
 [William Wythers' Expanded Ecosphere] ❌ Not yet compatible with 1.21
 ```
+
+## Development
+
+You can run the tests using Rake:
+
+```sh
+rake test
+```
