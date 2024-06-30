@@ -24,6 +24,10 @@ module PackwizUpgradeable
       assert_equal MinecraftVersion.new(1, 21, 0), MinecraftVersion.parse('1.21')
       assert_equal MinecraftVersion.new(1, 21), MinecraftVersion.parse('1.21.0')
       assert_equal MinecraftVersion.new(1, 21, 1), MinecraftVersion.parse('1.21.1')
+
+      assert_nil MinecraftVersion.parse('24w21a')
+      assert_nil MinecraftVersion.parse('1.21-pre1')
+      assert_nil MinecraftVersion.parse('1.21-rc1')
     end
 
     def test_to_s
