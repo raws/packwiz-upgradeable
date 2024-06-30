@@ -10,6 +10,11 @@ require 'packwiz_upgradeable'
 
 USAGE = 'Usage: packwiz-upgradeable path/to/pack.toml target_minecraft_version'
 
+if ARGV.include?('--help')
+  $stderr.puts USAGE
+  exit
+end
+
 if ARGV.size < 2
   $stderr.puts 'Error: must provide path to a Packwiz pack.toml and target Minecraft version.'
   $stderr.puts USAGE
