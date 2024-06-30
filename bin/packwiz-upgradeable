@@ -5,14 +5,26 @@ require 'bundler/setup'
 Bundler.require(:default)
 require 'pathname'
 
+$:.unshift(File.join(File.dirname(__FILE__), '../lib'))
+require 'packwiz_upgradeable'
+
+USAGE = 'Usage: packwiz-upgradeable path/to/pack.toml target_minecraft_version'
+
 if ARGV.size < 2
-  $stderr.puts 'Error: must provide path to a Packwiz pack.toml and target Minecraft version'
-  $stderr.puts 'Usage: packwiz-upgradeable path/to/pack.toml target_minecraft_version'
+  $stderr.puts 'Error: must provide path to a Packwiz pack.toml and target Minecraft version.'
+  $stderr.puts USAGE
   exit 1
 end
 
 pack_file_path = Pathname.new(ARGV[0])
-target_minecraft_version = ARGV[1]
+target_minecraft_version = PackwizUpgradeable::MinecraftVersion.parse(ARGV[1])
+
+if target_minecraft_version.nil?
+  $stderr.puts "Error: \"#{ARGV[1]}\" is not a recognized Minecraft release version. Version " \
+    'numbers like "1.21" and "1.21.1" are supported.'
+  $stderr.puts USAGE
+  exit 1
+end
 
 # Load pack.toml into a Ruby hash
 pack = PerfectTOML.load_file(pack_file_path)
@@ -46,7 +58,7 @@ pack_file_paths.each do |path|
       json = response.parse
       game_versions = json['game_versions']
 
-      if game_versions.any? { |version| version.start_with?(target_minecraft_version) }
+      if game_versions.any? { |version| version.start_with?(target_minecraft_version.to_s) }
         puts "[#{mod_name}] ✅ Compatible with #{target_minecraft_version}"
       else
         puts "[#{mod_name}] ❌ Not yet compatible with #{target_minecraft_version}"
