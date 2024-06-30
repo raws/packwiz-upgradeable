@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+# Usage: packwiz-upgradeable path/to/pack.toml target_minecraft_version
+
+require 'bundler/setup'
+Bundler.require(:default)
+require 'pathname'
+
+if ARGV.size < 2
+  $stderr.puts 'Error: must provide path to a Packwiz pack.toml and target Minecraft version'
+  $stderr.puts 'Usage: packwiz-upgradeable path/to/pack.toml target_minecraft_version'
+  exit 1
+end
+
+pack_file_path = Pathname.new(ARGV[0])
+target_minecraft_version = ARGV[1]
+
+# Load pack.toml into a Ruby hash
+pack = PerfectTOML.load_file(pack_file_path)
+
+# Load index.toml into a Ruby hash
+index_file_path = pack_file_path.dirname.join(pack.dig('index', 'file'))
+index = PerfectTOML.load_file(index_file_path)
+
+pack_file_paths = index['files'].map do |file|
+  pack_file_path.dirname.join(file['file'])
+end.select do |path|
+  path.to_s.end_with?('.pw.toml') # Filter to Packwiz metadata files
+end
+
+pack_file_paths.each do |path|
+  metadata = PerfectTOML.load_file(path)
+  mod_name = metadata['name']
+
+  if curseforge_project_id = metadata.dig('update', 'curseforge', 'project-id')
+    puts "[#{mod_name}] Check Curseforge for updates to project #{curseforge_project_id}"
+  elsif modrinth_mod_id = metadata.dig('update', 'modrinth', 'mod-id')
+    url = "https://api.modrinth.com/v2/project/#{modrinth_mod_id}"
+    headers = {
+      'accept' => 'application/json',
+      'user-agent' => 'raws/packwiz-upgradeable (ross@rosspaffett.com)'
+    }
+
+    response = HTTP.headers(headers).get(url)
+
+    if response.status.success?
+      json = response.parse
+      game_versions = json['game_versions']
+
+      if game_versions.any? { |version| version.start_with?(target_minecraft_version) }
+        puts "[#{mod_name}] ✅ Compatible with #{target_minecraft_version}"
+      else
+        puts "[#{mod_name}] ❌ Not yet compatible with #{target_minecraft_version}"
+      end
+    else
+      puts "[#{mod_name}] ⚠️ Received HTTP #{response.status} from Modrinth: #{response.body}"
+    end
+
+    sleep 0.25
+  else
+    puts "[#{mod_name}] ❓ Skipping update check because there's no Curseforge or Modrinth metadata. " \
+      "Current version: #{metadata['filename']}"
+  end
+end
