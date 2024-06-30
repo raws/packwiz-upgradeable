@@ -16,7 +16,7 @@ Install Gem dependencies:
 bundle
 ```
 
-Run `bin/packwiz-upgradeable`, providing it with a path to a Packwiz `pack.toml` file and a target Minecraft version. Only _release_ versions, like `1.21` and `1.21.1`, are supported. Snapshots (`24w21a`), pre-releases (`1.21-pre1`) and release candidates (`1.21-rc1`) will cause packwiz-upgradeable to complain.
+Run `bin/packwiz-upgradeable`, providing it with a path to a Packwiz `pack.toml` file and a target Minecraft version. Only _release_ versions, like `1.21` and `1.21.1`, are supported. Snapshots (`24w21a`), pre-releases (`1.21-pre1`) and release candidates (`1.21-rc1`) will cause packwiz-upgradeable to complain. Per Mojang and Minecraft community convention, packwiz-upgradeable considers `1.21` and `1.21.0` to be equivalent.
 
 ```sh
 bin/packwiz-upgradeable path/to/pack.toml 1.21
